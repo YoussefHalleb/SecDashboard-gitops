@@ -2,12 +2,19 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: secdashboard-ingress
+  namespace: default
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - 35.195.231.227.nip.io
+      secretName: secdashboard-tls
   rules:
-    - http:
+    - host: 35.195.231.227.nip.io # ← hostname explicite obligatoire
+      http:
         paths:
           - path: /api/.*
             pathType: ImplementationSpecific
