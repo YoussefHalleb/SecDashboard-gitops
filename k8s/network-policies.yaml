@@ -1,4 +1,3 @@
-# 1. Bloquer tout le trafic par défaut
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -11,7 +10,6 @@ spec:
     - Egress
 
 ---
-# 2. Frontend — accepte seulement depuis Ingress
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -35,10 +33,22 @@ spec:
             matchLabels:
               app: backend
       ports:
-        - port: 5000
+        - protocol: TCP
+          port: 5000
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
 
 ---
-# 3. Backend — accepte depuis Ingress et Frontend
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -66,14 +76,27 @@ spec:
             matchLabels:
               app: postgres
       ports:
-        - port: 5432
-    # DNS
+        - protocol: TCP
+          port: 5432
+
     - to:
-        - namespaceSelector: {}
+        - ipBlock:
+            cidr: 169.254.20.10/32
       ports:
-        - port: 53
-          protocol: UDP
-    # Internet (pour Groq API, GitHub API)
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    - to:
+        - ipBlock:
+            cidr: 10.52.0.10/32
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
     - to:
         - ipBlock:
             cidr: 0.0.0.0/0
@@ -83,7 +106,6 @@ spec:
               - 192.168.0.0/16
 
 ---
-# 4. Postgres — accepte seulement depuis Backend
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -102,5 +124,6 @@ spec:
             matchLabels:
               app: backend
       ports:
-        - port: 5432
+        - protocol: TCP
+          port: 5432
   egress: []
