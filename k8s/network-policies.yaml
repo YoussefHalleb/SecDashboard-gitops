@@ -35,13 +35,19 @@ spec:
       ports:
         - protocol: TCP
           port: 5000
+
     - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-          podSelector:
-            matchLabels:
-              k8s-app: kube-dns
+        - ipBlock:
+            cidr: 169.254.20.10/32
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    - to:
+        - ipBlock:
+            cidr: 10.52.0.10/32
       ports:
         - protocol: UDP
           port: 53
