@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: defectdojo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/helm-charts
+    chart: defectdojo
+    targetRevision: "*"
+    helm:
+      valuesObject:
+        host: defectdojo.35.195.231.227.nip.io
+        django:
+          ingress:
+            enabled: false  # on gère l'ingress manuellement
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: defectdojo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
