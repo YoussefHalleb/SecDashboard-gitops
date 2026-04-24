@@ -29,7 +29,16 @@ spec:
           volumeMounts:
             - name: uploads
               mountPath: /app/uploads
+            - name: gcp-key
+              mountPath: /secrets
+              readOnly: true
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /secrets/gcp-key.json
       volumes:
         - name: uploads
           persistentVolumeClaim:
             claimName: uploads-pvc
+        - name: gcp-key
+          secret:
+            secretName: gcp-key
