@@ -23,18 +23,32 @@ spec:
           image: gcr.io/secdashboard-pfe/backend:c10c87276dd8d0903d2f6f5709a7221fe02cf3c3
           ports:
             - containerPort: 5000
+
+          # 🔐 Variables depuis secret (DB, JWT, etc.)
           envFrom:
             - secretRef:
                 name: backend-secret
+
+          # 🔑 Variables Vertex AI (IMPORTANT)
+          env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /secrets/gcp-key.json
+            - name: GCP_PROJECT_ID
+              value: secdashboard-pfe
+            - name: VERTEX_ENGINE_ID
+              value: owasp-rag-search_1776940899539
+            - name: VERTEX_DATASTORE_ID
+              value: owasp-security-docs_1776940659305
+            - name: VERTEX_LOCATION
+              value: global
+
           volumeMounts:
             - name: uploads
               mountPath: /app/uploads
             - name: gcp-key
               mountPath: /secrets
               readOnly: true
-          env:
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: /secrets/gcp-key.json
+
       volumes:
         - name: uploads
           persistentVolumeClaim:
