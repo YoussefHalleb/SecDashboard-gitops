@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: gcr.io/secdashboard-pfe/backend:025455f91f9e1bd9e029dab69f92cecd020229f8
+          image: gcr.io/secdashboard-pfe/backend:9bce4bed63812c9d07ceaf913f3ddec66082700e
           ports:
             - containerPort: 5000
 
