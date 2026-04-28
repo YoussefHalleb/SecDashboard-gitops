@@ -17,7 +17,7 @@ spec:
     metadata:
       labels:
         app: backend
-  spec:
+    spec:
       containers:
         - name: backend
           image: gcr.io/secdashboard-pfe/backend:fc259358226d260ba578a9a05cb98aaefdf5e82a
