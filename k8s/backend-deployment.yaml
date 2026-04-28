@@ -17,7 +17,9 @@ spec:
     metadata:
       labels:
         app: backend
-    spec:
+   spec:
+      nodeSelector:
+        kubernetes.io/hostname: gke-secdashboard-clu-secdashboard-nod-f1bd2797-lm2d
       containers:
         - name: backend
           image: gcr.io/secdashboard-pfe/backend:fc259358226d260ba578a9a05cb98aaefdf5e82a
