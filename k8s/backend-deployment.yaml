@@ -18,6 +18,7 @@ spec:
       labels:
         app: backend
     spec:
+      serviceAccountName: back-sa
       containers:
         - name: backend
           image: gcr.io/secdashboard-pfe/backend:fc259358226d260ba578a9a05cb98aaefdf5e82a
