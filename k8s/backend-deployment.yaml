@@ -25,15 +25,11 @@ spec:
           ports:
             - containerPort: 5000
 
-          # 🔐 Variables depuis secret (DB, JWT, etc.)
           envFrom:
             - secretRef:
                 name: backend-secret
 
-          # 🔑 Variables Vertex AI (IMPORTANT)
           env:
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: /secrets/gcp-key.json
             - name: GCP_PROJECT_ID
               value: secdashboard-pfe
             - name: VERTEX_ENGINE_ID
@@ -46,14 +42,8 @@ spec:
           volumeMounts:
             - name: uploads
               mountPath: /app/uploads
-            - name: gcp-key
-              mountPath: /secrets
-              readOnly: true
 
       volumes:
         - name: uploads
           persistentVolumeClaim:
             claimName: uploads-pvc
-        - name: gcp-key
-          secret:
-            secretName: gcp-key
