@@ -4,7 +4,7 @@ metadata:
   name: secdashboard-admin-binding
 subjects:
   - kind: User
-    name: admin@example.com
+    name: youssefhalleb20@gmail.com
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
