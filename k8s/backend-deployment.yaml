@@ -21,7 +21,7 @@ spec:
       serviceAccountName: back-sa
       containers:
         - name: backend
-          image: gcr.io/secdashboard-pfe/backend:e294dcb3a029b046278e794e771c90771d58a69d
+          image: gcr.io/secdashboard-pfe/backend:d1af2f0337c0d0ae9f42e04da1aec1f401a9e279
           ports:
             - containerPort: 5000
 
