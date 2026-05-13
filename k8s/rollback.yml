@@ -1,0 +1,67 @@
+name: Deploy & Auto Rollback
+
+on:
+  push:
+    branches: [main]
+
+env:
+  ARGOCD_APP: secdashboard
+  ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+
+jobs:
+  deploy-and-watch:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install ArgoCD CLI
+        run: |
+          curl -sSL -o argocd \
+            https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x argocd
+          sudo mv argocd /usr/local/bin/
+
+      - name: Login ArgoCD
+        run: |
+          argocd login $ARGOCD_SERVER \
+            --auth-token ${{ secrets.ARGOCD_TOKEN }} \
+            --grpc-web \
+            --insecure
+
+      - name: Sync app
+        run: |
+          argocd app sync secdashboard --force
+
+      - name: Wait for healthy state
+        id: wait
+        run: |
+          argocd app wait secdashboard \
+            --health \
+            --sync \
+            --timeout 180
+        continue-on-error: true
+
+      - name: Check health result
+        id: check
+        run: |
+          STATUS=$(argocd app get secdashboard -o json | jq -r '.status.health.status')
+          echo "health=$STATUS" >> $GITHUB_OUTPUT
+          echo "App health: $STATUS"
+
+      - name: Rollback si KO
+        if: steps.wait.outcome == 'failure' || steps.check.outputs.health != 'Healthy'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git revert HEAD --no-edit
+          git push origin main
+          echo "::error::Deploiement KO — rollback effectue"
+          exit 1
+
+      - name: Deploy success
+        if: steps.wait.outcome == 'success' && steps.check.outputs.health == 'Healthy'
+        run: echo "Deploiement OK - ${{ github.sha }}"
