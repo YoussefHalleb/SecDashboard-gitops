@@ -1,0 +1,36 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: deploy-only
+  namespace: production
+rules:
+  # Deployments : lire + mettre à jour (pour rollout)
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "create", "update", "patch"]
+
+  # Pods : lire uniquement (pour vérifier que le deploy est OK)
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+
+  # ReplicaSets : lire (ArgoCD en a besoin)
+  - apiGroups: ["apps"]
+    resources: ["replicasets"]
+    verbs: ["get", "list"]
+
+  # Services : lire + créer (ArgoCD peut créer des services)
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "create", "update", "patch"]
+
+  # ConfigMaps : lire + créer (manifests ArgoCD)
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "create", "update", "patch"]
+
+# CE QUI EST INTERDIT (pas de verbe = interdit par défaut) :
+#   - kubectl exec       → pas de pods/exec
+#   - kubectl delete     → pas de verbe "delete"
+#   - lire les secrets   → pas de resources: secrets
+#   - accès hors namespace production → c'est un Role, pas un ClusterRole
