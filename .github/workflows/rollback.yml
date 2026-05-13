@@ -29,8 +29,9 @@ jobs:
         run: |
           argocd login $ARGOCD_SERVER \
             --auth-token ${{ secrets.ARGOCD_TOKEN }} \
-            --grpc-web \
-            --insecure
+            --http-retry-max 3 \
+            --insecure \
+            --plaintext
 
       - name: Sync app
         run: |
