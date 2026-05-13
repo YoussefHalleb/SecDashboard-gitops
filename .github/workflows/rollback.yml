@@ -6,7 +6,7 @@ on:
 
 env:
   ARGOCD_APP: secdashboard
-  ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+  ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }} 
 
 jobs:
   deploy-and-watch:
