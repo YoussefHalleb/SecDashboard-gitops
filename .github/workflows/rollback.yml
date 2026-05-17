@@ -1,5 +1,5 @@
 name: Deploy & Auto Rollback
-on:
+on: 
   push:
     branches: [main]
 jobs:
