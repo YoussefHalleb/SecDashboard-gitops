@@ -1,4 +1,4 @@
-name: Deploy & Auto Rollback
+name: Deploy & Auto Rollback 
 on:
   push:
     branches: [main]
