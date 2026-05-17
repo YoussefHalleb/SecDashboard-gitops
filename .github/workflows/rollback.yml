@@ -1,67 +1,35 @@
-name: Deploy & Auto Rollback 
+name: Deploy & Auto Rollback
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - '**'  # override below — see note
-
 jobs:
   deploy-and-watch:
     runs-on: ubuntu-latest
-    # Skip if this is an automated rollback commit
-    if: "!contains(github.event.head_commit.message, '[rollback]')"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Wait for ArgoCD sync to start
-        run: sleep 20
-
-      - name: Poll ArgoCD until Healthy or timeout
+      - name: Wait for ArgoCD sync
+        run: sleep 30
+      - name: Check app health
         id: check
         run: |
-          MAX_ATTEMPTS=15
-          SLEEP_BETWEEN=20
-          STATUS=""
-
-          for i in $(seq 1 $MAX_ATTEMPTS); do
-            STATUS=$(curl -sk \
-              -H "Authorization: Bearer ${{ secrets.ARGOCD_TOKEN }}" \
-              https://34.78.163.124/api/v1/applications/secdashboard \
-              | jq -r '.status.health.status')
-
-            echo "Attempt $i/$MAX_ATTEMPTS — health: $STATUS"
-
-            if [ "$STATUS" = "Healthy" ]; then
-              echo "health=Healthy" >> $GITHUB_OUTPUT
-              exit 0
-            fi
-
-            # If degraded/error, no point waiting further
-            if [ "$STATUS" = "Degraded" ] || [ "$STATUS" = "Error" ]; then
-              echo "health=$STATUS" >> $GITHUB_OUTPUT
-              exit 0
-            fi
-
-            sleep $SLEEP_BETWEEN
-          done
-
-          # Timed out while still Progressing or Unknown
+          STATUS=$(curl -sk \
+            -H "Authorization: Bearer ${{ secrets.ARGOCD_TOKEN }}" \
+            https://34.78.163.124/api/v1/applications/secdashboard \
+            | jq -r '.status.health.status')
+          echo "health=$STATUS"
           echo "health=$STATUS" >> $GITHUB_OUTPUT
-
-      - name: Rollback if not Healthy
+      - name: Rollback si KO
         if: steps.check.outputs.health != 'Healthy'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git revert HEAD --no-edit -m 1
-          # Tag the commit so the workflow skips it (see `if:` on job above)
-          git commit --amend -m "$(git log -1 --format=%s) [rollback]"
+          git revert HEAD --no-edit
           git push origin main
-          echo "::error::Deployment KO (health=${{ steps.check.outputs.health }}) — rollback pushed"
+          echo "::error::Deploiement KO (${{ steps.check.outputs.health }}) — rollback effectue"
           exit 1
-
       - name: Deploy success
-        run: echo "Deployment OK — ${{ github.sha }}"
+        if: steps.check.outputs.health == 'Healthy'
+        run: echo "Deploiement OK - ${{ github.sha }}"
