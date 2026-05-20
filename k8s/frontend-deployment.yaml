@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: gcr.io/secdashboard-pfe/frontend:9384a8ed155b8b6670f9d5ff2cef13e7b15bee50
+          image: gcr.io/secdashboard-pfe/frontend:03ecbb19ae61fc0efc6ccf9285a05bafc15e3b9c
           ports:
             - containerPort: 80
